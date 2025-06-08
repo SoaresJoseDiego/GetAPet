@@ -83,28 +83,6 @@ module.exports = class UserController {
       return;
     }
 
-       //validations
-    if (!name) {
-      res.status(422).json({ message: "O nome é obrigatório" });
-      return;
-    }
-    if (!email) {
-      res.status(422).json({ message: "O email é obrigatório" });
-      return;
-    }
-    if (!phone) {
-      res.status(422).json({ message: "O telefone é obrigatório" });
-      return;
-    }
-    if (!password) {
-      res.status(422).json({ message: "A senha é obrigatória" });
-      return;
-    }
-    if (!confirmpassword) {
-      res.status(422).json({ message: "A confirmação da senha é obrigatória" });
-      return;
-    }
-
     //check if user exists
 
     const user = await User.findOne({
@@ -158,51 +136,54 @@ module.exports = class UserController {
   }
 
   static async editUser(req, res) {
-  const id = req.params.id;
-
-
-    //check if user exists 
-    const token = getToken(req);
-    const user = getUserByToken(token);
-
-
-  const {name, email, phone, password, confirmpassword} = req.body;
-
-  let image = '';
-
-       //validations
-       if (!name) {
-        res.status(422).json({ message: "O nome é obrigatório" });
+    try {
+      const id = req.params.id;
+      const token = getToken(req);
+      const user = getUserByToken(token);
+  
+      if (!req.body) {
+        res.status(400).json({ message: "Usuário errado" });
         return;
       }
-      if (!email) {
-        res.status(422).json({ message: "O email é obrigatório" });
-        return;
-      }
-      // check if email is already taken
-      const userExists = await User.findOne({email: email});
+  
+      const { name, email, phone, password, confirmpassword } = req.body;
+  
 
-      if(user.email !== email && userExists) {
-        res.status(422).json({message: "Usuário não encontrado"});
-        return;
-      }
+    let image = "";
 
-      user.email = email;
+    //validations
+    if (!name) {
+      res.status(422).json({ message: "O nome é obrigatório" });
+      return;
+    }
+    if (!email) {
+      res.status(422).json({ message: "O email é obrigatório" });
+      return;
+    }
+    // check if email is already taken
+    const userExists = await User.findOne({ email: email });
 
-      if (!phone) {
-        res.status(422).json({ message: "O telefone é obrigatório" });
-        return;
-      }
-      if (!password) {
-        res.status(422).json({ message: "A senha é obrigatória" });
-        return;
-      }
-      if (!confirmpassword) {
-        res.status(422).json({ message: "A confirmação da senha é obrigatória" });
-        return;
-      }
+    if (user.email !== email && userExists) {
+      res.status(422).json({ message: "Usuário não encontrado" });
+      return;
+    }
 
+    user.email = email;
 
-
+    if (!phone) {
+      res.status(422).json({ message: "O telefone é obrigatório" });
+      return;
+    }
+    if (!password) {
+      res.status(422).json({ message: "A senha é obrigatória" });
+      return;
+    }
+    if (!confirmpassword) {
+      res.status(422).json({ message: "A confirmação da senha é obrigatória" });
+      return;
+    }
+  }catch(err){
+    res.status(500).json({message: 'Erro ao editar usuário', err})
   }
 };
+}
